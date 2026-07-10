@@ -5,18 +5,16 @@
 
   function setTab(tab) {
     appStore.setActiveTab(tab);
-    appStore.resetFilter(); // reset filter saat ganti tab agar clean
+    appStore.resetFilter();
   }
 
   function openFAB() {
-    // FAB akan trigger modal di komponen induk, atau kita trigger langsung?
-    // Kita kirim event ke App supaya buka modal berdasarkan tab aktif.
     const event = new CustomEvent('fab-click', { detail: { tab: appStore.activeTab } });
     window.dispatchEvent(event);
   }
 </script>
 
-<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-lg border-t border-gray-200/70 safe-bottom pb-safe">
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-lg border-t border-gray-200/70 pb-safe">
   <div class="flex items-center justify-around h-16 max-w-lg mx-auto relative px-2">
     {#each keys as key}
       {@const cfg = tableConfigs[key]}
@@ -36,7 +34,7 @@
       </button>
     {/each}
 
-    <!-- FAB di tengah -->
+    <!-- FAB -->
     <button 
       onclick={openFAB} 
       class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center hover:bg-blue-700 transition-transform hover:scale-105 active:scale-95"
@@ -45,7 +43,3 @@
     </button>
   </div>
 </div>
-
-<style>
-  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
-</style>
