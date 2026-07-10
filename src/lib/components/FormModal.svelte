@@ -43,8 +43,8 @@
         </button>
       </div>
 
-      <form onsubmit|preventDefault={submit} class="space-y-4">
-        {#each config.formFields as key}
+      <form on:submit|preventDefault={submit} class="space-y-4">
+{#each config.formFields as key}
           {@const col = config.columns.find(c => c.key === key)}
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">{col.label}</label>
