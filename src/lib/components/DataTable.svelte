@@ -8,15 +8,15 @@
   import FilterBar from './FilterBar.svelte';
   import { createVirtualizer } from '@tanstack/svelte-virtual';
   import { Pencil, Trash2, Upload, Download, Plus } from 'lucide-svelte';
+  import { tableConfigs } from '$lib/config/tables.js';
 
-  export let configKey; // 'pelanggan', 'penjualan', etc.
+  let { configKey } = $props();
 
-  const config = $derived(appStore.modalConfig || {});
+  const currentConfig = $derived(tableConfigs[configKey]);
   let containerRef = $state(null);
   let items = $state([]);
   let loading = $state(true);
 
-  // Load data
   async function load() {
     loading = true;
     await appStore.loadData(configKey);
@@ -25,12 +25,10 @@
   }
   load();
 
-  // Filtering & Searching
   const filteredItems = $derived(() => {
     let data = items;
     if (!data) return [];
 
-    // Search
     const q = appStore.searchQuery.toLowerCase().trim();
     if (q) {
       data = data.filter(item =>
@@ -40,12 +38,10 @@
       );
     }
 
-    // Date filter
     data = filterByDate(data, appStore.dateFilter);
     return data;
   });
 
-  // Virtual Scroll
   const virtualizer = createVirtualizer({
     get count() { return filteredItems().length; },
     get scrollElement() { return containerRef; },
@@ -53,29 +49,18 @@
     overscan: 5,
   });
 
-  // Open Modal
   function openModal(mode, data = null) {
-    const cfg = getConfig();
-    appStore.setModalConfig(cfg);
+    appStore.setModalConfig(currentConfig);
     appStore.setModalMode(mode);
     appStore.setModalData(data || {});
     appStore.setModalOpen(true);
   }
 
-  function getConfig() {
-    return { ...import('$lib/config/tables.js').then(m => m.tableConfigs[configKey]) }; // fix: import statically
-  }
-  // Better to import statically at top
-  import { tableConfigs } from '$lib/config/tables.js';
-  const currentConfig = $derived(tableConfigs[configKey]);
-
-  // Handle Save
   async function handleSave(event) {
     await appStore.saveData(configKey, event.detail);
     await load();
   }
 
-  // Delete
   async function deleteItem(id) {
     if (confirm('Yakin hapus?')) {
       await crud.remove(configKey, id);
@@ -83,12 +68,10 @@
     }
   }
 
-  // Export
   function handleExport() {
     exportCSV(filteredItems(), currentConfig.columns, currentConfig.name);
   }
 
-  // Import
   async function handleImport(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -104,7 +87,6 @@
     event.target.value = '';
   }
 
-  // Kas Saldo
   const kasSummary = $derived(() => {
     if (configKey !== 'kas') return null;
     const totalMasuk = items.filter(i => i.jenis === 'Masuk').reduce((a, b) => a + (b.nominal || 0), 0);
@@ -112,7 +94,6 @@
     return { masuk: totalMasuk, keluar: totalKeluar, saldo: totalMasuk - totalKeluar };
   });
 
-  // Double Click WA (khusus penjualan)
   function onRowDblClick(row) {
     if (currentConfig.isPenjualan) {
       const pesan = `Halo, saya dari toko. Total belanja anda: Rp${row.total?.toLocaleString() || 0}. Terima kasih!`;
@@ -124,9 +105,8 @@
 <FilterBar />
 
 {#if loading}
-  <div class="flex justify-center py-8"><span class="loading loading-spinner loading-md text-blue-500">Loading...</span></div>
+  <div class="flex justify-center py-8"><span class="text-blue-500">Loading...</span></div>
 {:else}
-  <!-- Kas Summary -->
   {#if kasSummary}
     <div class="grid grid-cols-3 gap-3 mt-4 mb-4">
       <div class="bg-gradient-to-br from-green-50 to-green-100/60 p-3 rounded-xl border border-green-200/50">
@@ -144,7 +124,6 @@
     </div>
   {/if}
 
-  <!-- Toolbar & Table -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100/80 overflow-hidden mt-3">
     <div class="flex flex-wrap items-center justify-between gap-2 p-3 border-b border-gray-100 bg-gray-50/50">
       <span class="text-sm font-semibold text-gray-600">{currentConfig.name}</span>
