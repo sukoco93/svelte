@@ -4,6 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   // ⚠️ Ganti 'svelte-spa-app' dengan NAMA REPO KAMU!
-  base: '/svelte/', 
+  base: '/', 
   plugins: [svelte(), tailwindcss()],
 });
