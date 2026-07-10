@@ -1,9 +1,14 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
 export default defineConfig({
-  // ⚠️ Ganti 'svelte-spa-app' dengan NAMA REPO KAMU!
-  base: '/', 
+  base: '/',
   plugins: [svelte(), tailwindcss()],
+  resolve: {
+    alias: {
+      '$lib': path.resolve(__dirname, 'src/lib')
+    }
+  }
 });
