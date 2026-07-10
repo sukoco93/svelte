@@ -22,7 +22,8 @@
     }
   });
 
-  function submit() {
+  function submit(event) {
+    event.preventDefault(); // <-- preventDefault manual
     dispatch('save', form);
   }
 
@@ -43,8 +44,9 @@
         </button>
       </div>
 
-      <form on:submit|preventDefault={submit} class="space-y-4">
-{#each config.formFields as key}
+      <!-- Perbaikan di sini: onsubmit={submit} -->
+      <form onsubmit={submit} class="space-y-4">
+        {#each config.formFields as key}
           {@const col = config.columns.find(c => c.key === key)}
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">{col.label}</label>
